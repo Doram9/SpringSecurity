@@ -1,11 +1,15 @@
 package io.security.springsecurity;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -21,6 +25,9 @@ import java.io.IOException;
 @Configuration
 @EnableWebSecurity //웹 보안 활성화
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    UserDetailsService userDetailsService;
 
     //authentication : 인증(유저가 누구인지 확인하는 절차,(로그인, 회원가입))
     //authorization : 인가(유저에 대한 권한을 허락하는 것)
@@ -56,6 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll(); //인증 없이 누구나 접근 가능
 
         http
+                //로그아웃 처리
                 .logout()
                 .logoutUrl("/logout") //기본적으로 logout 처리는 post 방식으로 한다
                 .logoutSuccessUrl("/login")
@@ -69,10 +77,37 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutSuccessHandler(new LogoutSuccessHandler() {
                     @Override
                     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                        response.sendRedirect("/login");
+                        response.sendRedirect("/loginPage");
                     }
                 })
-                .deleteCookies("remember-me")
+                ;
+        http
+                //rememberMe 쿠키 생성
+                .rememberMe()
+                .rememberMeParameter("remember")
+                .tokenValiditySeconds(3600)
+                .userDetailsService(userDetailsService)
+                ;
+
+        http
+                .sessionManagement()
+                .maximumSessions(1) //최대 세션 허용 개수
+                .maxSessionsPreventsLogin(false) //동시 로그인 차단
+                //.expiredUrl(url) //세션 만료시 이동 url
+        ;
+        http
+                .sessionManagement()
+                //.sessionFixation().none(); //JSessionID 변경x -> 공격에 취약
+                .sessionFixation().changeSessionId(); //로그인 시 JSessionID 변경
+
+        http
+                .sessionManagement()
+                .sessionCreationPolicy( //세션 정책
+//                    SessionCreationPolicy.ALWAYS //세션 항상 생성
+                    SessionCreationPolicy.IF_REQUIRED //스프링시큐리티가 필요 시 생성(기본값)
+//                    SessionCreationPolicy.NEVER //스프링 시큐리티가 생성하지 않지만 이미 존재하면 사용
+//                    SessionCreationPolicy.STATELESS // 스프링 시큐리티가 생성하지 않고 존재해도 사용하지 않음
+                )
                 ;
     }
 }

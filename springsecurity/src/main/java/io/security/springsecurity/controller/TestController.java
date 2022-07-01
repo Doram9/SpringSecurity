@@ -26,4 +26,9 @@ public class TestController {
     public String loginPage() {
         return "loginPage";
     }
+
+    @GetMapping("expired")
+    public String expired() {
+        return "expired";
+    }
 }
