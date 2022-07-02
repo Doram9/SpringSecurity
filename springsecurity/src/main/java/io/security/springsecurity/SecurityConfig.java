@@ -60,7 +60,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         response.sendRedirect("/");
                     }
                 })
-                .permitAll(); //인증 없이 누구나 접근 가능
+                .permitAll() //인증 없이 누구나 접근 가능
+        ;
 
         http
                 //로그아웃 처리
@@ -74,12 +75,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         session.invalidate();
                     }
                 })
-                .logoutSuccessHandler(new LogoutSuccessHandler() {
-                    @Override
-                    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                        response.sendRedirect("/loginPage");
-                    }
-                })
+//                .logoutSuccessHandler(new LogoutSuccessHandler() {
+//                    @Override
+//                    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+//                        response.sendRedirect("/");
+//                    }
+//                })
                 ;
         http
                 //rememberMe 쿠키 생성
@@ -92,22 +93,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .sessionManagement()
                 .maximumSessions(1) //최대 세션 허용 개수
-                .maxSessionsPreventsLogin(false) //동시 로그인 차단
+                //.maxSessionsPreventsLogin(false) //false : 동시 로그인 허용 - 로그인시 이전 session 만료
+                .maxSessionsPreventsLogin(true) //true : 동시 로그인 차단 - 로그인시 인증 실패
                 //.expiredUrl(url) //세션 만료시 이동 url
         ;
-        http
-                .sessionManagement()
+//        http
+//                .sessionManagement()
                 //.sessionFixation().none(); //JSessionID 변경x -> 공격에 취약
-                .sessionFixation().changeSessionId(); //로그인 시 JSessionID 변경
+//                .sessionFixation().changeSessionId(); //로그인 시 JSessionID 변경
 
-        http
-                .sessionManagement()
-                .sessionCreationPolicy( //세션 정책
+//        http
+//                .sessionManagement()
+//                .sessionCreationPolicy( //세션 정책
 //                    SessionCreationPolicy.ALWAYS //세션 항상 생성
-                    SessionCreationPolicy.IF_REQUIRED //스프링시큐리티가 필요 시 생성(기본값)
+//                    SessionCreationPolicy.IF_REQUIRED //스프링시큐리티가 필요 시 생성(기본값)
 //                    SessionCreationPolicy.NEVER //스프링 시큐리티가 생성하지 않지만 이미 존재하면 사용
 //                    SessionCreationPolicy.STATELESS // 스프링 시큐리티가 생성하지 않고 존재해도 사용하지 않음
-                )
-                ;
+//                )
+//                ;
     }
 }
