@@ -31,4 +31,29 @@ public class TestController {
     public String expired() {
         return "expired";
     }
+
+    @GetMapping("/user")
+    public String user() {
+        return "user";
+    }
+
+    @GetMapping("/admin/pay")
+    public String adminPay() {
+        return "adminPay";
+    }
+
+    @GetMapping("/admin/**")
+    public String admin() {
+        return "admin";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/denied")
+    public String denied() {
+        return "denied";
+    }
 }
